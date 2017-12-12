@@ -12,10 +12,10 @@
 
 (defhydra hydra-org-link-edit (:color red)
   "Org Link Edit"
-  ("j" org-link-edit-forward-slurp "forward slurp")
+  ("l" org-link-edit-forward-slurp "forward slurp")
   ("k" org-link-edit-forward-barf "forward barf")
-  ("u" org-link-edit-backward-slurp "backward slurp")
-  ("i" org-link-edit-backward-barf "backward barf")
+  ("h" org-link-edit-backward-slurp "backward slurp")
+  ("j" org-link-edit-backward-barf "backward barf")
   ("r" jk/unlinkify "remove link")
   ("q" nil "cancel" :color blue))
 
@@ -50,7 +50,7 @@
   ("C-m" ivy-done :exit t)
   ("f" ivy-call)
   ("c" ivy-toggle-calling)
-  ("m" ivy-toggle-fuzzy)
+  ("m" ivy-rotate-preferred-builders)
   (">" ivy-minibuffer-grow)
   ("<" ivy-minibuffer-shrink)
   ("w" ivy-prev-action)
@@ -58,7 +58,11 @@
   ("a" ivy-read-action)
   ("t" (setq truncate-lines (not truncate-lines)))
   ("C" ivy-toggle-case-fold)
-  ("o" ivy-occur :exit t))
+  ("o" ivy-occur :exit t)
+  ("D" (ivy-exit-with-action
+        (lambda (_) (find-function 'hydra-ivy/body)))
+       :exit t))
+
 
 (defhydra hydra-help (:exit t)
     ;; Better to exit after any command because otherwise helm gets in a
@@ -278,6 +282,7 @@ T - tag prefix
   ("g" revert-buffer)        ;; read all directories again (refresh)
   ("i" dired-maybe-insert-subdir)
   ("l" dired-do-redisplay)   ;; relist the marked or singel directory
+  ("k" dired-k)
   ("M" dired-do-chmod)
   ("m" dired-mark)
   ("O" dired-display-file)
@@ -365,6 +370,7 @@ T - tag prefix
   ("t" org-time-stamp)
   ("u" org-time-stamp-inactive)
   ("q" nil :color blue))
+
 (defhydra sk/hydra-org-jump (:color pink
                                     :hint nil)
   "
@@ -469,6 +475,7 @@ _h_tml    ^ ^        _A_SCII:
         ("#" server-edit "server edit")
         ("w" spacemacs/window-manipulation-transient-state/body "window")
         ("l" hydra-sp/body "sp")
+        ("D" hydra-ediff/body "diff")
         ("s" save-buffer "save")
         ("o" counsel-mark-ring "mark ring")
         ("k" counsel-yank-pop "kill ring")
@@ -493,4 +500,70 @@ _h_tml    ^ ^        _A_SCII:
  `(defhydra hydra-spawn-global (:color blue :columns 8)
     "Hydra"
     ,@grim/hydra-global-heads))
+
+(defhydra hydra-ediff (:color blue :hint nil)
+  "
+^Buffers           Files           VC                     Ediff regions
+----------------------------------------------------------------------
+_b_uffers           _f_iles (_=_)       _r_evisions              _l_inewise
+_B_uffers (3-way)   _F_iles (3-way)                          _w_ordwise
+                  _c_urrent file
+"
+  ("b" ediff-buffers)
+  ("B" ediff-buffers3)
+  ("=" ediff-files)
+  ("f" ediff-files)
+  ("F" ediff-files3)
+  ("c" ediff-current-file)
+  ("r" ediff-revision)
+  ("l" ediff-regions-linewise)
+  ("w" ediff-regions-wordwise))
+
+(defhydra goto (:color blue :hint nil)
+  "
+Goto:
+^Char^              ^Word^                ^org^                    ^search^
+^^^^^^^^---------------------------------------------------------------------------
+_c_: 2 chars        _w_: word by char     _h_: heading in buffer  _o_: helm-occur
+_C_: char           _W_: some word        _a_: heading in all buffers _p_: helm-swiper
+_L_: char in line   _s_: subword by char  _q_: swiper org buffers   _f_: search forward
+^  ^                _S_: some subword     ^ ^                      _b_: search backward
+-----------------------------------------------------------------------------------
+_B_: helm-buffers       _l_: avy-goto-line
+_m_: helm-mini          _i_: ace-window
+_R_: helm-recentf
+
+_n_: Navigate           _._: mark position _/_: jump to mark
+"
+  ("c" avy-goto-char-2)
+  ("C" avy-goto-char)
+  ("L" avy-goto-char-in-line)
+  ("w" avy-goto-word-1)
+  ;; jump to beginning of some word
+  ("W" avy-goto-word-0)
+  ;; jump to subword starting with a char
+  ("s" avy-goto-subword-1)
+  ;; jump to some subword
+  ("S" avy-goto-subword-0)
+
+  ("l" avy-goto-line)
+  ("i" ace-window)
+
+  ("h" counsel-org-goto)
+  ("a" counsel-org-goto-all)
+  ("q" swiper-all)
+
+  ("o" helm-occur)
+  ("p" swiper-helm)
+
+  ("f" isearch-forward)
+  ("b" isearch-backward)
+
+  ("." org-mark-ring-push :color red)
+  ("/" org-mark-ring-goto :color blue)
+  ("B" helm-buffers-list)
+  ("m" helm-mini)
+  ("R" helm-recentf)
+  ("n" hydra-navigate/body))
+
 (provide 'grim-hydras)

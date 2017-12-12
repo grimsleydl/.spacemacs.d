@@ -1,3 +1,115 @@
+(defun my-smarter-kill-ring-save ()
+  (interactive)
+  (if (region-active-p)
+      (call-interactively #'kill-ring-save)
+    (when (eq major-mode 'org-mode)
+      (call-interactively #'my-org-retrieve-url-from-point))))
+
+(defun my-yank-org-link (text)
+  (if (derived-mode-p 'org-mode)
+      (insert text)
+    (string-match org-bracket-link-regexp text)
+    (insert (substring text (match-beginning 1) (match-end 1)))))
+
+(defun my-org-retrieve-url-from-point ()
+  (interactive)
+  (let* ((link-info (assoc :link (org-context)))
+         (text (when link-info
+                 ;; org-context seems to return nil if the current element
+                 ;; starts at buffer-start or ends at buffer-end
+                 (buffer-substring-no-properties (or (cadr link-info) (point-min))
+                                                 (or (caddr link-info) (point-max))))))
+    (if (not text)
+        (error "Not in org link")
+      (add-text-properties 0 (length text) '(yank-handler (my-yank-org-link)) text)
+      (kill-new text))))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; function to wrap blocks of text in org templates                       ;;
+;; e.g. latex or src etc                                                  ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun org-begin-template ()
+  "Make a template at point."
+  (interactive)
+  (if (org-at-table-p)
+      (call-interactively 'org-table-rotate-recalc-marks)
+    (let* ((choices '(("s" . "SRC")
+                      ("e" . "EXAMPLE")
+                      ("q" . "QUOTE")
+                      ("v" . "VERSE")
+                      ("c" . "CENTER")
+                      ("l" . "LaTeX")
+                      ("h" . "HTML")
+                      ("a" . "ASCII")))
+           (key
+            (key-description
+             (vector
+              (read-key
+               (concat (propertize "Template type: " 'face 'minibuffer-prompt)
+                       (mapconcat (lambda (choice)
+                                    (concat (propertize (car choice) 'face 'font-lock-type-face)
+                                            ": "
+                                            (cdr choice)))
+                                  choices
+                                  ", ")))))))
+      (let ((result (assoc key choices)))
+        (when result
+          (let ((choice (cdr result)))
+            (cond
+             ((region-active-p)
+              (let ((start (region-beginning))
+                    (end (region-end)))
+                (goto-char end)
+                (insert "\n#+END_" choice)
+                ;; (insert "#+END_" choice "\n")
+                (goto-char start)
+                (insert "#+BEGIN_" choice "\n")))
+             (t
+              (insert "#+BEGIN_" choice "\n")
+              (save-excursion (insert "#+END_" choice))))))))))
+
+;; FONTS
+;; -----
+;; Set variable-pitch font using customize-face variable-pitch
+;; Set the fonts to format correctly for specific modes. Default is set for fixed
+;; so we only need to have the exceptions
+;; https://www.reddit.com/r/emacs/comments/66w75c/monospace_font_for_calendar_in_orgmode/dglrjnv/
+(defun set-buffer-variable-pitch ()
+  (interactive)
+  (grim/buffer-face-mode-variable)
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+  ;; (set-face-attribute 'org-link nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-date nil :inherit 'fixed-pitch)
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
+  (set-face-attribute 'org-special-keyword nil :inherit 'fixed-pitch)
+  )
+
+(defun org-completion-symbols ()
+  (when (looking-back "=[a-zA-Z]+")
+    (let (cands)
+      (save-match-data
+        (save-excursion
+          (goto-char (point-min))
+          (while (re-search-forward "=\\([a-zA-Z]+\\)=" nil t)
+            (cl-pushnew
+             (match-string-no-properties 0) cands :test 'equal))
+          cands))
+      (when cands
+        (list (match-beginning 0) (match-end 0) cands)))))
+
+(defvar org-blocks-hidden nil)
+(defun org-toggle-blocks ()
+  (interactive)
+  (if org-blocks-hidden
+      (org-show-block-all)
+    (org-hide-block-all))
+  (setq-local org-blocks-hidden (not org-blocks-hidden)))
+
+
 (defun hot-expand (str)
   "Expand org template."
   (insert str)
@@ -22,8 +134,8 @@
                       (make-string (org-element-property :post-blank eop) ?\s)))))))
 
 (defun my/org-word-count (beg end
-                           &optional count-latex-macro-args?
-                           count-footnotes?)
+                              &optional count-latex-macro-args?
+                              count-footnotes?)
   "Report the number of words in the Org mode buffer or selected region.
 Ignores:
 - comments
@@ -280,7 +392,7 @@ of its arguments."
                 (delete-region (match-beginning 0) (org-end-of-subtree t t))))))
      (message "Footnotes successfully inlined."))))
 (fset 'org-footnote-convert-next-to-inline
-   [?s ?n ?: escape ?, ?, ?D ?0 ?, ?, ?f ?\] ?i ?: ?  escape ?p escape])
+      [?s ?n ?: escape ?, ?, ?D ?0 ?, ?, ?f ?\] ?i ?: ?  escape ?p escape])
 
 ;; http://stackoverflow.com/questions/14351154/org-mode-outline-level-specific-fill-column-values
 ;; (defun my-org-mode-hook ()
@@ -307,66 +419,66 @@ of its arguments."
   (next-line 1))
 
 (defun org-schedule-effort ()
-(interactive)
+  (interactive)
   (save-excursion
     (org-back-to-heading t)
     (let* (
-        (element (org-element-at-point))
-        (effort (org-element-property :EFFORT element))
-        (scheduled (org-element-property :scheduled element))
-        (ts-year-start (org-element-property :year-start scheduled))
-        (ts-month-start (org-element-property :month-start scheduled))
-        (ts-day-start (org-element-property :day-start scheduled))
-        (ts-hour-start (org-element-property :hour-start scheduled))
-        (ts-minute-start (org-element-property :minute-start scheduled)) )
+           (element (org-element-at-point))
+           (effort (org-element-property :EFFORT element))
+           (scheduled (org-element-property :scheduled element))
+           (ts-year-start (org-element-property :year-start scheduled))
+           (ts-month-start (org-element-property :month-start scheduled))
+           (ts-day-start (org-element-property :day-start scheduled))
+           (ts-hour-start (org-element-property :hour-start scheduled))
+           (ts-minute-start (org-element-property :minute-start scheduled)) )
       (org-schedule nil (concat
-        (format "%s" ts-year-start)
-        "-"
-        (if (< ts-month-start 10)
-          (concat "0" (format "%s" ts-month-start))
-          (format "%s" ts-month-start))
-        "-"
-        (if (< ts-day-start 10)
-          (concat "0" (format "%s" ts-day-start))
-          (format "%s" ts-day-start))
-        " "
-        (if (< ts-hour-start 10)
-          (concat "0" (format "%s" ts-hour-start))
-          (format "%s" ts-hour-start))
-        ":"
-        (if (< ts-minute-start 10)
-          (concat "0" (format "%s" ts-minute-start))
-          (format "%s" ts-minute-start))
-        "+"
-        effort)) )))
+                         (format "%s" ts-year-start)
+                         "-"
+                         (if (< ts-month-start 10)
+                             (concat "0" (format "%s" ts-month-start))
+                           (format "%s" ts-month-start))
+                         "-"
+                         (if (< ts-day-start 10)
+                             (concat "0" (format "%s" ts-day-start))
+                           (format "%s" ts-day-start))
+                         " "
+                         (if (< ts-hour-start 10)
+                             (concat "0" (format "%s" ts-hour-start))
+                           (format "%s" ts-hour-start))
+                         ":"
+                         (if (< ts-minute-start 10)
+                             (concat "0" (format "%s" ts-minute-start))
+                           (format "%s" ts-minute-start))
+                         "+"
+                         effort)) )))
 
 (defun my/org-agenda-current-subtree-or-region (prefix)
-    "Display an agenda view for the current subtree or region.
+  "Display an agenda view for the current subtree or region.
 With prefix, display only TODO-keyword items."
-    (interactive "p")
-    (let (header)
-      (if (use-region-p)
-          (progn
-            (setq header "Region")
-            (put 'org-agenda-files 'org-restrict (list (buffer-file-name (current-buffer))))
-            (setq org-agenda-restrict (current-buffer))
-            (move-marker org-agenda-restrict-begin (region-beginning))
-            (move-marker org-agenda-restrict-end
-                         (save-excursion
-                           ;; If point is at beginning of line, include heading on that line by moving point forward 1 char
-                           (goto-char (1+ (region-end)))
-                           (org-end-of-subtree))))
+  (interactive "p")
+  (let (header)
+    (if (use-region-p)
         (progn
-          ;; No region; restrict to subtree
-          (setq header "Subtree")
-          (org-agenda-set-restriction-lock 'subtree)))
+          (setq header "Region")
+          (put 'org-agenda-files 'org-restrict (list (buffer-file-name (current-buffer))))
+          (setq org-agenda-restrict (current-buffer))
+          (move-marker org-agenda-restrict-begin (region-beginning))
+          (move-marker org-agenda-restrict-end
+                       (save-excursion
+                         ;; If point is at beginning of line, include heading on that line by moving point forward 1 char
+                         (goto-char (1+ (region-end)))
+                         (org-end-of-subtree))))
+      (progn
+        ;; No region; restrict to subtree
+        (setq header "Subtree")
+        (org-agenda-set-restriction-lock 'subtree)))
 
-      ;; Sorting doesn't seem to be working, but the header is
-      (let ((org-agenda-sorting-strategy '(priority-down timestamp-up))
-            (org-agenda-overriding-header header))
-        (org-search-view (if (>= prefix 4) t nil) "*"))
-      (org-agenda-remove-restriction-lock t)
-      (message nil)))
+    ;; Sorting doesn't seem to be working, but the header is
+    (let ((org-agenda-sorting-strategy '(priority-down timestamp-up))
+          (org-agenda-overriding-header header))
+      (org-search-view (if (>= prefix 4) t nil) "*"))
+    (org-agenda-remove-restriction-lock t)
+    (message nil)))
 
 (defun my/org-zoom-in ()
   (outline-next-visible-heading)
@@ -782,6 +894,7 @@ TAG is chosen interactively from the global tags completion table."
 
 (defun my-org-insert-link ()
   "Insert org link where default description is set to html title."
+  (require 'mm-url)
   (interactive)
   (let* ((url (read-string "URL: "))
          (title (get-html-title-from-url url)))

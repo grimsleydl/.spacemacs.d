@@ -1,6 +1,76 @@
 ;; -*- mode: emacs-lisp -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
+(defvar dotspacemacs/layers/core
+  '(ivy
+    (auto-completion :variables
+                     auto-completion-enable-sort-by-usage t
+                     auto-completion-enable-snippets-in-popup t
+                     auto-completion-enable-help-tooltip t
+                     )
+    better-defaults
+    command-log
+    colors
+    evil-cleverparens
+    evil-commentary
+    (evil-snipe :variables
+                evil-snipe-enable-alternate-f-and-t-behaviors t)
+    git
+    github
+    nlinum
+    (org :variables
+         org-want-todo-bindings t)
+    pdf-tools
+    (shell :variables
+           shell-default-height 30
+           shell-default-position 'bottom)
+    syntax-checking
+    themes-megapack
+    ;; version-control
+    vim-empty-lines))
+(defvar dotspacemacs/layers/extra
+  '(;; dash
+    ;; deft
+    ;; emoji
+    ;; eyebrowse
+    ibuffer
+    imenu-list
+    ;; origami
+    pandoc
+    ranger
+    ;; search-engine
+    ;; speed-reading
+    treemacs
+    ;; unimpaired
+    writeroom))
+(defvar dotspacemacs/layers/langs
+  '(emacs-lisp
+    autohotkey
+    ;; docker
+    ;; (haskell :variables
+    ;;          haskell-enable-hindent-style "chris-done")
+    ;; (html :variables
+    ;;       scss-compile-at-save nil)
+    javascript
+    ;; (latex :variables
+    ;;        latex-enable-folding t
+    ;;        latex-enable-auto-fill t)
+    markdown
+    ;; nginx
+    ;; (python)
+    ;; (ipython-notebook)
+    shell-scripts
+    elixir
+    (elm :variables
+         elm-sort-imports-on-save t
+         ;; elm-format-command ;; "elm-format-0.18"
+         )
+    ;; fsharp
+    windows-scripts
+    yaml))
+(defvar dotspacemacs/layers/local
+  '((grim :location local)
+    (grim-org :location local)))
 
 (defun dotspacemacs/layers ()
   "Layer configuration:
@@ -29,168 +99,67 @@ This function should only modify configuration layer settings."
    dotspacemacs-configuration-layer-path '("~/.spacemacs.d/")
    ;; List of configuration layers to load. If it is the symbol `all' instead
    ;; of a list then all discovered layers will be installed.
-   grim--layers
-   '(
-     (emacs-lisp)
-     (ivy)
-     (auto-completion :variables
-                      auto-completion-enable-sort-by-usage t
-                      auto-completion-enable-snippets-in-popup t
-                      auto-completion-enable-help-tooltip t
-                      ;; auto-completion-return-key-behavior nil)
-                      )
-     (autohotkey)
-     (better-defaults)
-     (command-log)
-     (colors)
-     ;; (dash)
-     ;; (docker)
-     ;; deft
-     ;; emoji
-     (evil-cleverparens)
-     (evil-commentary)
-     (evil-snipe :variables
-                 evil-snipe-enable-alternate-f-and-t-behaviors t)
-     ;; eyebrowse
-     (git)
-     (github)
-     ;; (haskell :variables
-     ;;          haskell-enable-hindent-style "chris-done")
-     ;; (html :variables
-     ;;       scss-compile-at-save nil)
-     (ibuffer)
-     (imenu-list)
-     (javascript)
-     ;; (latex :variables
-     ;;        latex-enable-folding t
-     ;;        latex-enable-auto-fill t)
-     (markdown)
-     ;; (nginx)
-     (nlinum)
-     ;; (org :variables
-     ;;      org-enable-reveal-js-support t)
-     (org :variables
-          org-want-todo-bindings t)
-     ;; origami
-     (pandoc)
-     ;; (python)
-     ;; (ipython-notebook)
-     ;; (ranger)
-     ;; (search-engine)
-     (shell :variables
-            shell-default-height 30
-            shell-default-position 'bottom)
-     (shell-scripts)
-     ;; (speed-reading)
-     (syntax-checking)
-     (themes-megapack)
-     ;; unimpaired
-     ;; (version-control)
-     (vim-empty-lines)
-     (windows-scripts)
-     (writeroom)
-     ;; (yaml)
-     (elixir)
-     (elm :variables
-          elm-sort-imports-on-save t
-          ;; elm-format-command ;; "elm-format-0.18"
-          )
-     ;; (fsharp)
-     (treemacs)
-     (yaml)
-     )
-   )
-
-  (setq
-   grim--windows-layers
-   '(
-     (grim :variables
-              grim--windows t
-              grim--osx nil
-              grim--unix nil)
-     )
-   grim--darwin-layers
-   '(
-     osx
-     (grim :variables
-              grim--osx t            ; bound by osx layer
-              grim--windows nil
-              grim--unix nil)
-     ;; (ruby :variables ruby-version-manager 'chruby
-     ;;       ruby-enable-enh-ruby-mode nil)
-     )
-   grim--gnu/linux-layers
-   '(
-     (grim :variables
-              grim--windows t
-              grim--osx nil
-              grim--unix t)
-     ;; (ruby :variables ruby-version-manager 'chruby
-     ;; ruby-enable-enh-ruby-mode nil)
-     )
-   grim--personal-layers
-   '(
-     (grim-org)
-     )
-   )
-  (cond ((eq system-type 'windows-nt)
-         (setq grim--layers (append grim--layers grim--windows-layers)))
-        ((eq system-type 'darwin)
-         (setq grim--layers (append grim--layers grim--darwin-layers)))
-        ((eq system-type 'gnu/linux)
-         (setq grim--layers (append grim--layers grim--gnu/linux-layers))))
-  (setq grim--layers (append grim--layers grim--personal-layers))
-  ;; (when (member system-name grim-work-systems)
-  ;;   (setq grim--layers (append grim-layers grim-work-layers)))
-
-  (setq-default
-   dotspacemacs-configuration-layers grim--layers
+   dotspacemacs-configuration-layers (append dotspacemacs/layers/core
+                                             dotspacemacs/layers/extra
+                                             dotspacemacs/layers/langs
+                                             dotspacemacs/layers/local)
 
    dotspacemacs-additional-packages '(all-the-icons
+                                      ;; amx
                                       ;; fancy-narrow
                                       ;; darkroom
-                                      dired-k
+                                      dotenv-mode
                                       draft-mode
                                       electric-spacing
+                                      ;; evil-briefcase
                                       evil-embrace
                                       evil-goggles
                                       evil-smartparens
                                       fancy-narrow
                                       focus
-                                      fzf
+                                      ;; fzf
                                       helpful
                                       ;; hideshow-orgmode
                                       imenu-anywhere
+                                      indent-tools
                                       ivy-rich
                                       key-chord
                                       kill-or-bury-alive
+                                      lispy
+                                      magithub
+                                      moe-theme
                                       ;; nlinum
                                       olivetti
                                       org-bookmark-heading
                                       org-brain
-                                      (org-bullets :location (recipe :fetcher github :repo "notetiene/org-bullets"))
+                                      ;; (org-bullets :location (recipe :fetcher github :repo "Kaligule/org-bullets"))
                                       ;; org-dashboard
                                       ;; org-doing
                                       org-journal
                                       ;; org-page
                                       ;; org-recipes
+                                      ;; transclusion-minor-mode
+                                      ;; org-quick-peek
                                       ;; palimpsest
                                       paper-theme
                                       quickrun
+                                      ;; rainbow-blocks
                                       ;; related
                                       ;; (global-set-key (kbd "<your key seq>") 'related-switch-forward)
                                       ;; (global-set-key (kbd "<your key seq>") 'related-switch-backward)
                                       ;; You might also want to try related-switch-buffer, which prompt you
                                       ;; for the next related buffer to go to (no default key binding here).
+                                      snazzy-theme
                                       terminal-here
+                                      tldr
                                       tiny
                                       unfill
                                       ;; vimish-fold
                                       wc-mode
-                                      writegood-mode
-                                      )
+                                      writegood-mode)
 
    dotspacemacs-excluded-packages '(evil-unimpaired)
+   dotspacemacs-frozen-packages '()
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and deletes any unused
@@ -198,7 +167,7 @@ This function should only modify configuration layer settings."
    ;; installs only the used packages but won't delete unused ones. `all'
    ;; installs *all* packages supported by Spacemacs and never uninstalls them.
    ;; (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used-but-keep-unused))
 
 (defun dotspacemacs/init ()
   "Initialization:
@@ -218,6 +187,13 @@ It should only modify the values of Spacemacs settings."
    ;; Maximum allowed time in seconds to contact an ELPA repository.
    ;; (default 5)
    dotspacemacs-elpa-timeout 5
+   ;; If non-nil then Spacelpa repository is the primary source to install
+   ;; a locked version of packages. If nil then Spacemacs will install the lastest
+   ;; version of packages from MELPA. (default nil)
+   dotspacemacs-use-spacelpa nil
+   ;; If non-nil then verify the signature for downloaded Spacelpa archives.
+   ;; (default nil)
+   dotspacemacs-verify-spacelpa-archives nil
    ;; If non-nil then spacemacs will check for updates at startup
    ;; when the current branch is not `develop'. Note that checking for
    ;; new versions works via git commands, thus it calls GitHub services
@@ -263,14 +239,15 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(gruvbox
-                         darktooth
-                         material
+   dotspacemacs-themes '((nord :location (recipe :fetcher github
+                                                 :repo "arcticicestudio/nord-emacs"))
+                         snazzy
+                         gruvbox
+                         moe-dark
+                         moe-light
                          material-light
-                         spacemacs-dark
                          spacemacs-light
-                         leuven
-                         )
+                         leuven)
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state t
@@ -420,7 +397,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-folding-method 'evil
    ;; If non-nil `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
-   dotspacemacs-smartparens-strict-mode t
+   dotspacemacs-smartparens-strict-mode nil
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc…
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
@@ -551,7 +528,18 @@ This function is called at the very end of Spacemacs startup, after
 layer configuration.
 Put your configuration code here, except for variables that  should be set before packages are loaded."
   (require 'grim-hydras)
+  (setq nord-comment-brightness 15)		
+  (setq nord-region-highlight "snowstorm")
+  (setq hydra-look-for-remap t)
+  (global-hungry-delete-mode)
+  (global-prettify-symbols-mode 1)
   (setq-default line-spacing 0)
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(fixed-pitch ((t (:family "Fira Code")))))
   ;; (setq python-shell-native-complete nil)
   ;; (setq jedi:server-command
   ;;       `("python"
@@ -568,6 +556,7 @@ Put your configuration code here, except for variables that  should be set befor
   ;; (spacemacs/load-theme 'gruvbox)
   (setq password-cache-expiry nil)
   (setq tramp-use-ssh-controlmaster-options nil)
+  (setq epa-pinentry-mode 'loopback)
   (setq tramp-default-method "sshx")
   ;; (add-to-list 'tramp-default-proxies-alist
   ;;              '(nil "\\`root\\'" "/ssh:%h:"))
@@ -576,11 +565,15 @@ Put your configuration code here, except for variables that  should be set befor
 
   ;; (add-to-list 'tramp-default-proxies-alist
   ;;              '("45\\.55\\.213\\.17" "\\`root\\'" "/plink:%h:"))
+  ;; (add-to-list 'tramp-methods
+  ;;              '("yadm"
+  ;;                (tramp-login-program "yadm")
+  ;;                (tramp-login-args (("enter")))
+  ;;                (tramp-remote-shell "/bin/sh")
+  ;;                (tramp-remote-shell-args ("-c"))))
 
-  (global-hungry-delete-mode)
   ;; (add-hook 'visual-line-mode-hook 'visual-fill-column-mode)
   (setq gruvbox-contrast 'hard)
-  (global-prettify-symbols-mode 1)
   (setq w32-get-true-file-attributes nil)
 
   (let ((cmd-exe "/mnt/c/Windows/System32/cmd.exe")
@@ -602,13 +595,20 @@ Put your configuration code here, except for variables that  should be set befor
   (add-to-list 'auto-mode-alist '("\\.zsh\\'" . sh-mode))
 
   (setq ivy-ignore-buffers (quote ("\\` " "_archive")))
-  (setq ivy-count-format "%d/%d ")
+  (add-to-list 'ivy-ignore-buffers "\\*Messages\\*")
+  (add-to-list 'ivy-ignore-buffers "\\*Warnings\\*")
+  (add-to-list 'ivy-ignore-buffers "\\*spacemacs\\*")
+  (setq ivy-count-format "(%d/%d) ")
+  (setq ivy-format-function 'ivy-format-function-arrow)
   ;; (setq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
   (setq ivy-initial-inputs-alist nil)
+  (setq ivy-use-selectable-prompt t)
+  (setq ivy-dynamic-exhibit-delay-ms 100)
+
   (ivy-set-actions
    'counsel-describe-function
    '(("h" ejmr-helpful-try-all "Helpful")))
-   (ivy-set-actions
+  (ivy-set-actions
    'counsel-find-file
    '(("d" delete-file "delete")))
   (ivy-set-display-transformer 'ivy-switch-buffer 'ivy-rich-switch-buffer-transformer)
@@ -629,6 +629,7 @@ Put your configuration code here, except for variables that  should be set befor
   (setq show-paren-style 'parenthesis)
   (setq frame-title-format '(buffer-file-name "%f" ("%b")))
   (setq-default evil-escape-key-sequence "jk")
+  ;; fix password escaping if it has the evil-escape-key-sequence in it
   (defun my-read-passwd (read-passwd &rest args)
     "Inhibit evil-escape"
     (let ((evil-escape-inhibit t))
@@ -651,20 +652,10 @@ Put your configuration code here, except for variables that  should be set befor
 
   (add-hook 'text-mode-hook
             #'endless/config-prose-completion)
+  ;; Set default font faces for Info and ERC modes
+  (add-hook 'erc-mode-hook 'grim/buffer-face-mode-variable)
+  (add-hook 'Info-mode-hook 'grim/buffer-face-mode-variable)
 
-  (add-hook 'org-mode-hook
-            '(lambda ()
-               ;; make the lines in the buffer wrap around the edges of the screen.
-               ;; (visual-line-mode)
-               ;; (auto-fill-mode)
-               (spacemacs/toggle-visual-line-navigation-on)
-               (spacemacs/toggle-auto-fill-mode-on)
-               (set-buffer-variable-pitch)
-               ;; (org-indent-mode)
-               (setq fill-column 100)
-               (spacemacs|diminish buffer-face-mode)
-               )
-            )
   ;; (add-hook 'org-mode-hook 'wc-mode)
   ;; Haskell
   (when (configuration-layer/layer-usedp 'haskell)
@@ -675,29 +666,7 @@ Put your configuration code here, except for variables that  should be set befor
     (defadvice haskell-interactive-switch (after spacemacs/haskell-interactive-switch-advice activate)
       (when (eq dotspacemacs-editing-style 'vim)
         (call-interactively 'evil-insert))))
-  ;; (with-eval-after-load 'org
-  ;;   )
   (setq imenu-list-position 'left)
-
-  ;; (shackle-mode t)
-  ;; (setq shackle-rules
-  ;;       '(("*helm-ag*"              :select t   :align right :size 0.5)
-  ;;         ("*helm semantic/imenu*"  :select t   :align right :size 0.4)
-  ;;         ("*helm org inbuffer*"    :select t   :align right :size 0.4)
-  ;;         (flycheck-error-list-mode :select nil :align below :size 0.25)
-  ;;         (ert-results-mode         :select t   :align below :size 0.5)
-  ;;         (calendar-mode            :select t   :align below :size 0.25)
-  ;;         (racer-help-mode          :select t   :align right :size 0.5)
-  ;;         (help-mode                :select t   :align right :size 0.5)
-  ;;         (helpful-mode             :select t   :align right :size 0.5)
-  ;;         (compilation-mode         :select t   :align right :size 0.5)
-  ;;         ("*Org Select*"           :select t   :align below :size 0.33)
-  ;;         ("*Org Note*"             :select t   :align below :size 0.33)
-  ;;         ("*Org Links*"            :select t   :align below :size 0.2)
-  ;;         (" *Org todo*"            :select t   :align below :size 0.2)
-  ;;         ("*Man.*"                 :select t   :align below :size 0.5  :regexp t)
-  ;;         ("*helm.*"                :select t   :align below :size 0.33 :regexp t)
-  ;;         ("*Org Src.*"             :select t   :align below :size 0.5  :regexp t)))
   )
 
 (setq custom-file "~/.spacemacs.d/custom.el")

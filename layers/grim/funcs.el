@@ -1,3 +1,11 @@
+(defun ora-cap-filesystem ()
+  (let (path)
+    (when (setq path (ffap-string-at-point))
+      (let ((compl (all-completions path #'read-file-name-internal)))
+        (when compl
+          (let ((offset (ivy-completion-common-length (car compl))))
+            (list (- (point) offset) (point) compl)))))))
+
 ;; https://unix.stackexchange.com/questions/19124/bash-multi-line-command-with-comments-after-the-continuation-character
 (defun shell-multiline-comment ()
   (interactive)
@@ -38,23 +46,6 @@
     (save-restriction
       (widen)
       (fill-region (point-min) (point-max)))))
-;; FONTS
-;; -----
-;; Set variable-pitch font using customize-face variable-pitch
-;; Set the fonts to format correctly for specific modes. Default is set for fixed
-;; so we only need to have the exceptions
-;; https://www.reddit.com/r/emacs/comments/66w75c/monospace_font_for_calendar_in_orgmode/dglrjnv/
-(defun set-buffer-variable-pitch ()
-  (interactive)
-  (grim/buffer-face-mode-variable)
-  (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-link nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-code nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-block nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-date nil :inherit 'fixed-pitch)
-  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
-  (set-face-attribute 'org-special-keyword nil :inherit 'fixed-pitch)
-  )
 
 (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
   (let ((list (if (not (listp list-or-symbol))
@@ -231,43 +222,6 @@ suitable for sorting words across hard line breaks."
           (setq amend (buffer-substring-no-properties pt (point))))))
     (when amend
       (insert (replace-regexp-in-string "  +" " " amend)))))
-
-;; (when grim--windows
-;;   (prefer-coding-system 'utf-8)
-;;   (set-default-coding-systems 'utf-8)
-;;   (setq locale-coding-system 'utf-8)
-;;   (set-terminal-coding-system 'utf-8)
-;;   (set-keyboard-coding-system 'utf-8)
-;;   (set-selection-coding-system 'utf-16-le)
-;;   (if (boundp 'buffer-file-coding-system)
-;;       (setq-default buffer-file-coding-system 'utf-8)
-;;     (setq buffer-file-coding-system 'utf-8))
-;;   ;; (if ((eq system-type 'windows-nt)
-;;   ;; (set-fontset-font "fontset-default" 'unicode "Segoe UI Symbol")))
-;;   ;; (setq-default buffer-file-coding-system 'utf-16-le)))
-;;   (setq current-language-environment "UTF-8")
-;;   (when (display-graphic-p)
-;;     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
-;;   (set-fontset-font "fontset-default" 'unicode "Segoe UI Symbol")
-;;   )
-
-;; (when grim--unix
-;;   (prefer-coding-system 'utf-8)
-;;   (set-default-coding-systems 'utf-8)
-;;   (setq locale-coding-system 'utf-8)
-;;   (set-terminal-coding-system 'utf-8)
-;;   (set-keyboard-coding-system 'utf-8)
-;;   (set-selection-coding-system 'utf-8)
-;;   (if (boundp 'buffer-file-coding-system)
-;;       (setq-default buffer-file-coding-system 'utf-8)
-;;     (setq buffer-file-coding-system 'utf-8))
-;;   ;; (if ((eq system-type 'windows-nt)
-;;   ;; (set-fontset-font "fontset-default" 'unicode "Segoe UI Symbol")))
-;;   ;; (setq-default buffer-file-coding-system 'utf-16-le)))
-;;   (setq current-language-environment "UTF-8")
-;;   (when (display-graphic-p)
-;;     (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
-;;   )
 
 (defun sk/goto-closest-number ()
   (interactive)
@@ -504,7 +458,7 @@ buffer's name.
 (defun grim/buffer-face-mode-variable ()
   "Set font to a variable width (proportional) fonts in current buffer"
   (interactive)
-  (setq buffer-face-mode-face '(:family "Fira Sans"))
+  (setq buffer-face-mode-face '(:family "Fantasque Sans Mono"))
   (buffer-face-mode))
 
 ;; Use monospaced font faces in current buffer
@@ -513,9 +467,6 @@ buffer's name.
   (interactive)
   (setq buffer-face-mode-face '(:family "Fira Code"))
   (buffer-face-mode))
-;; Set default font faces for Info and ERC modes
-(add-hook 'erc-mode-hook 'grim/buffer-face-mode-variable)
-(add-hook 'Info-mode-hook 'grim/buffer-face-mode-variable)
 ;; (defun my-adjoin-to-list-or-symbol (element list-or-symbol)
 ;;   (let ((list (if (not (listp list-or-symbol))
 ;;                   (list list-or-symbol)
